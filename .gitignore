@@ -19,6 +19,7 @@
 
 # production
 /build
+/src/app/pages/api/file_metadata.json
 
 # misc
 .DS_Store

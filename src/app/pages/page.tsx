@@ -4,6 +4,9 @@ import Image from "next/image";
 export default function Home() {
   const exampleCommand = `npx --max-old-space-size=4096 ts-node --esm sorta.ts /path/to/source /path/to/destination`;
   const exampleCommandByName = `npx --max-old-space-size=4096 ts-node --esm sorta-by-name.ts /path/to/source /path/to/destination/screenshots`;
+  const exampleCreateMetaData = `npx ts-node --esm create-metadata.ts /path/to/source /path/to/this/github/repo/src/app/pages/api/file_metadata.json`;
+  const exampleSortaPics = `npx --max-old-space-size=4096 ts-node --esm sorta-pics.ts /path/to/source /path/to/destination`
+  
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -148,7 +151,7 @@ export default function Home() {
           </li>
           <li>
             <strong>Prepare Your Script:</strong> Make sure your
-            `organizeByType.ts` script is located in a directory accessible by
+            `sorta.ts` script is located in a directory accessible by
             your terminal.
           </li>
           <li>
@@ -233,7 +236,7 @@ export default function Home() {
             Copy
           </button>
         </div>
-        <h2>Sorta by Name</h2>
+        <h2>1.2 Sorta by Name</h2>
         <p>Additionally, you can use the sorta-by-name.ts script to organize by text present in file names, like &apos;Screenshot&apos; for example.</p>
         <div
           style={{
@@ -260,6 +263,73 @@ export default function Home() {
               marginBottom: "20px"
             }}
             onClick={() => handleCopy(exampleCommandByName)}
+          >
+            Copy
+          </button>
+        </div>
+         <h2>1.3 Sorta Pics</h2>
+         <p>This script is for just image files. Set your desired source and destination folder in the sorta-pics.ts script.</p>
+         <ul>
+          <li>
+            Create metadata file using the desired source and this repository as the destination directory for file_metadata.json
+          </li>
+         </ul>
+         <p>Create Metadata File</p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#2d2d2d",
+            padding: "10px",
+            borderRadius: "5px",
+            marginTop: "10px",
+            color: "#f8f8f2",
+            marginBottom: "20px"
+          }}
+        >
+          <code style={{ flex: 1 }}>{exampleCreateMetaData}</code>
+          <button
+            style={{
+              marginLeft: "10px",
+              padding: "5px 10px",
+              backgroundColor: "#61dafb",
+              color: "#1e1e1e",
+              border: "none",
+              borderRadius: "3px",
+              cursor: "pointer",
+              marginBottom: "20px"
+            }}
+            onClick={() => handleCopy(exampleCreateMetaData)}
+          >
+            Copy
+          </button>
+        </div>
+        <p>Run</p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#2d2d2d",
+            padding: "10px",
+            borderRadius: "5px",
+            marginTop: "10px",
+            color: "#f8f8f2",
+            marginBottom: "20px"
+          }}
+        >
+          <code style={{ flex: 1 }}>{exampleSortaPics}</code>
+          <button
+            style={{
+              marginLeft: "10px",
+              padding: "5px 10px",
+              backgroundColor: "#61dafb",
+              color: "#1e1e1e",
+              border: "none",
+              borderRadius: "3px",
+              cursor: "pointer",
+              marginBottom: "20px"
+            }}
+            onClick={() => handleCopy(exampleSortaPics)}
           >
             Copy
           </button>
