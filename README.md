@@ -1,6 +1,6 @@
 # Sorta: A File Organizer Tool
 
-Sorta (formerly known as The Juggler) is a powerful file organization tool that allows you to sort and manage files effortlessly based on specific criteria, such as file name or type.
+Sorta is a powerful file organization tool that allows you to sort and manage files effortlessly based on specific criteria, such as file name or type.
 
 ## Features
 - Organize files based on their names, extensions, or other custom criteria.
