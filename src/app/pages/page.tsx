@@ -67,6 +67,12 @@ export default function Home() {
           files into your destination folder based on their types.
         </p>
         <p>
+          Sorta searches all folders and subfolders at the specified source and 
+          copies all files into folders based on file type, leaving the originals 
+          in their place, and creating an all-in-one location for each file type 
+          at the new destination. 
+        </p>
+        <p>
           <strong>Your Security Comes First:</strong>
         </p>
         <ul style={{ paddingLeft: "20px", margin: "10px 0" }}>
