@@ -21,7 +21,7 @@ Follow these steps to clone the repository, set up the environment, and run the 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/sorta.git
+git clone https://github.com/ilovespectra/sorta.git
 ```
 ### 2. Navigate to the Project Directory
 
