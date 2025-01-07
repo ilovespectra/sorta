@@ -1,4 +1,4 @@
-# Sorta: A File Organizer Tool
+# Sorta
 
 Sorta is a powerful file organization tool that allows you to sort and manage files effortlessly based on specific criteria, such as file name or type.
 
