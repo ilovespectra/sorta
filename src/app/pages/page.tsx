@@ -83,7 +83,47 @@ export default function Home() {
           stays private and under your control.
         </p>
       </div>
-
+       {/* GitHub Button */}
+       <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <a
+          href="https://github.com/ilovespectra/sorta"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#2d2d2d",
+            color: "#f5f5f5",
+            textDecoration: "none",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            border: "2px solid #61dafb",
+            fontWeight: "bold",
+            fontSize: "16px",
+            transition: "background-color 0.3s, color 0.3s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#61dafb";
+            e.currentTarget.style.color = "#1e1e1e";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#2d2d2d";
+            e.currentTarget.style.color = "#f5f5f5";
+          }}
+        >
+          <img
+            src="/github-logo-white.png"
+            alt="GitHub Logo"
+            style={{
+              width: "24px",
+              height: "24px",
+              marginRight: "10px",
+            }}
+          />
+          View on GitHub
+        </a>
+      </div>
       {/* Walkthrough Section */}
       <div style={{ maxWidth: "800px", margin: "0 auto", lineHeight: "1.6" }}>
         <h2>Step-by-Step Guide:</h2>
