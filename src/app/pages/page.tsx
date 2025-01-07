@@ -5,8 +5,8 @@ export default function Home() {
   const exampleCommand = `npx --max-old-space-size=4096 ts-node --esm sorta.ts /path/to/source /path/to/destination`;
   const exampleCommandByName = `npx --max-old-space-size=4096 ts-node --esm sorta-by-name.ts /path/to/source /path/to/destination/screenshots`;
   const exampleCreateMetaData = `npx ts-node --esm create-metadata.ts /path/to/source /path/to/this/github/repo/src/app/pages/api/file_metadata.json`;
-  const exampleSortaPics = `npx --max-old-space-size=4096 ts-node --esm sorta-pics.ts /path/to/source /path/to/destination`
-  
+  const exampleSortaPics = `npx --max-old-space-size=4096 ts-node --esm sorta-pics.ts /path/to/source /path/to/destination`;
+  const diskUtil = ` diskutil list`;
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -157,18 +157,33 @@ export default function Home() {
           <li>
             <strong>Locate Your Drives:</strong> Connect the drives you want to
             organize. Use the command below to find their paths:
-            <pre
-              style={{
-                backgroundColor: "#2d2d2d",
-                padding: "10px",
-                borderRadius: "5px",
-                overflowX: "auto",
-                marginTop: "10px",
-                color: "#f8f8f2",
-              }}
-            >
-              diskutil list
-            </pre>
+            <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#2d2d2d",
+            padding: "10px",
+            borderRadius: "5px",
+            marginTop: "10px",
+            color: "#f8f8f2",
+          }}
+        >
+          <code style={{ flex: 1 }}>{diskUtil}</code>
+          <button
+            style={{
+              marginLeft: "10px",
+              padding: "5px 10px",
+              backgroundColor: "#61dafb",
+              color: "#1e1e1e",
+              border: "none",
+              borderRadius: "3px",
+              cursor: "pointer",
+            }}
+            onClick={() => handleCopy(diskUtil)}
+          >
+            Copy
+          </button>
+        </div>
             Identify the paths, such as `/Volumes/YourDriveName`.
           </li>
           <li>
@@ -208,7 +223,7 @@ export default function Home() {
           </li>
         </ol>
 
-        <h2>Example Command:</h2>
+        {/* <h2>Example:</h2>
         <div
           style={{
             display: "flex",
@@ -235,7 +250,7 @@ export default function Home() {
           >
             Copy
           </button>
-        </div>
+        </div> */}
         <h2>1.2 Sorta by Name</h2>
         <p>Additionally, you can use the sorta-by-name.ts script to organize by text present in file names, like &apos;Screenshot&apos; for example.</p>
         <div
