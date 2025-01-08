@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import pLimit from 'p-limit';
 import chalk from 'chalk';
+import { SingleBar, Presets } from 'cli-progress';
 
 const metadataFilePath = './file_metadata.json';
 
@@ -51,15 +52,6 @@ async function directoryExists(dir: string): Promise<boolean> {
     }
 }
 
-async function fileExists(filePath: string): Promise<boolean> {
-    try {
-        await fs.access(filePath);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
 async function updateMetadataFile() {
     await fs.writeFile(metadataFilePath, JSON.stringify({ files: fileMetadataArray }, null, 4), 'utf-8');
 }
@@ -90,45 +82,59 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
     await collectFiles(srcDir);
 
-    const totalFiles = allFiles.length;
+    // Filter to include only files with extensions in `imageExtensions`
+    const relevantFiles = allFiles.filter(filePath =>
+        imageExtensions.has(path.extname(filePath).toLowerCase())
+    );
+
+    const totalFiles = relevantFiles.length;
     if (totalFiles === 0) {
-        console.log('No image files to organize.');
+        console.log('No images to organize.');
         return;
     }
 
-    console.log(`Found ${totalFiles} files. Starting organization...`);
+    console.log(`Found ${totalFiles} images. Starting organization...`);
+
+    // Initialize the progress bar
+    const progressBar = new SingleBar({
+        format: `Processing |${chalk.cyan('{bar}')}| {percentage}% | {value}/{total} Images`,
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591',
+        hideCursor: true,
+    }, Presets.shades_classic);
+
+    progressBar.start(totalFiles, 0);
 
     let processedFiles = 0;
 
     const processFile = async (filePath: string) => {
         const ext = path.extname(filePath).toLowerCase();
 
-        if (!imageExtensions.has(ext)) return;
-
         const metadata = fileMetadataMap[filePath];
         if (!metadata) {
-            console.log(chalk.yellow(`No metadata for file: ${filePath}`));
+            console.log(chalk.yellow(`No metadata for image: ${filePath}`));
+            progressBar.increment();
             return;
         }
 
         if (metadata.copied) {
-            console.log(chalk.cyan(`File already copied: ${filePath}`));
+            console.log(chalk.cyan(`Image already copied: ${filePath}`));
+            progressBar.increment();
             return;
         }
 
-        const typeDir = path.join(destDir, 'image', ext.replace('.', ''));
+        const typeDir = path.join(destDir, 'images', ext.replace('.', ''));
         if (!(await directoryExists(typeDir))) {
             await fs.mkdir(typeDir, { recursive: true });
         }
 
         const formattedTimestamp = formatTimestamp(metadata.timestamp);
         const baseName = path.basename(filePath, ext);
+
         let destFileName = `${formattedTimestamp}_${baseName}${ext}`;
         let destPath = path.join(typeDir, destFileName);
-
-        // Ensure uniqueness for duplicate files
         let suffix = 1;
-        while (await fileExists(destPath)) {
+        while (await directoryExists(destPath)) {
             destFileName = `${formattedTimestamp}_${baseName}_${suffix}${ext}`;
             destPath = path.join(typeDir, destFileName);
             suffix++;
@@ -136,19 +142,20 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
         await limit(async () => {
             await fs.copyFile(filePath, destPath);
-            metadata.copied = true; // Mark as copied
-            metadata.filename = destFileName; // Update filename in metadata
+            metadata.copied = true;
         });
 
         processedFiles++;
-        if (processedFiles % 10 === 0) await updateMetadataFile(); // Periodically save updates
+        progressBar.update(processedFiles);
+        if (processedFiles % 10 === 0) await updateMetadataFile(); 
     };
 
-    for (const file of allFiles) {
+    for (const file of relevantFiles) {
         await processFile(file);
     }
 
-    await updateMetadataFile(); // Final update
+    progressBar.stop();
+    await updateMetadataFile(); 
     console.log('\nImage organization complete!');
 }
 
