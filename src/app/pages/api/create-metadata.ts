@@ -1,8 +1,20 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as crypto from 'crypto';
+
+async function getFileHash(filePath: string): Promise<string | null> {
+    try {
+        const fileContent = await fs.readFile(filePath);
+        const hash = crypto.createHash('sha256').update(fileContent).digest('hex');
+        return hash;
+    } catch (err) {
+        console.error(`Error hashing file: ${filePath} - ${err}`);
+        return null;
+    }
+}
 
 async function getFileMetadata(dir: string, metadataFile: string) {
-    const filesMetadata: { files: { filename: string; path: string; timestamp: string; copied: boolean }[] } = {
+    const filesMetadata: { files: { filename: string; path: string; timestamp: string; copied: boolean; hash: string | null }[] } = {
         files: [],
     };
 
@@ -40,11 +52,16 @@ async function getFileMetadata(dir: string, metadataFile: string) {
                     const timestamp = stats.birthtime || stats.mtime;
 
                     if (timestamp) {
+                        // Calculate file hash
+                        const hash = await getFileHash(filePath);
+
+                        // Push metadata for the file, including the hash
                         filesMetadata.files.push({
                             filename: item.name,
                             path: filePath,
                             timestamp: timestamp.toISOString(), // ISO format for consistency
                             copied: false, // Set default copied value to false
+                            hash: hash || null, // Store the hash or null if it fails
                         });
                     } else {
                         console.warn(`No valid timestamp for file: ${filePath}`);

@@ -11,16 +11,11 @@ interface FileMetadata {
     path: string;
     timestamp: string;
     copied: boolean;
-    hash: string;
+    hash: string; 
 }
 
 let fileMetadataArray: FileMetadata[] = [];
 let fileMetadataMap: Record<string, FileMetadata> = {};
-const copiedHashes: Set<string> = new Set(); 
-
-// Variables to track duplicates and space saved
-let duplicateCount = 0;
-let spaceSaved = 0;
 
 try {
     const metadataFile = await fs.readFile(metadataFilePath, 'utf-8');
@@ -31,13 +26,6 @@ try {
         map[item.path] = item;
         return map;
     }, {} as Record<string, FileMetadata>);
-
-    // Populate the copiedHashes set with the hashes of already copied files
-    fileMetadataArray.forEach((item) => {
-        if (item.copied) {
-            copiedHashes.add(item.hash);
-        }
-    });
 } catch (err) {
     console.error(chalk.red(`Error reading metadata file: ${err}`));
 }
@@ -81,15 +69,15 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
     const collectFiles = async (currentDir: string) => {
         try {
             const items = await fs.readdir(currentDir, { withFileTypes: true });
-    
+
             for (const item of items) {
                 const itemPath = path.join(currentDir, item.name);
-    
+
                 if (item.name.startsWith('.')) {
                     console.warn(chalk.yellow(`Skipping hidden or system directory: ${itemPath}`));
                     continue;
                 }
-    
+
                 if (item.isDirectory()) {
                     await collectFiles(itemPath);
                 } else {
@@ -108,6 +96,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
     await collectFiles(srcDir);
 
+    // Filter to include only files with extensions in `imageExtensions`
     const relevantFiles = allFiles.filter(filePath =>
         imageExtensions.has(path.extname(filePath).toLowerCase())
     );
@@ -120,6 +109,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
     console.log(`Found ${totalFiles} images. Starting organization...`);
 
+    // Initialize the progress bar
     const progressBar = new SingleBar({
         format: `Processing |${chalk.cyan('{bar}')}| {percentage}% | {value}/{total} Images`,
         barCompleteChar: '\u2588',
@@ -133,6 +123,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
     const processFile = async (filePath: string) => {
         const ext = path.extname(filePath).toLowerCase();
+
         const metadata = fileMetadataMap[filePath];
         if (!metadata) {
             console.log(chalk.yellow(`No metadata for image: ${filePath}`));
@@ -140,14 +131,8 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
             return;
         }
 
-        // Skip the file if the hash is already copied
-        if (copiedHashes.has(metadata.hash)) {
-            console.log(chalk.cyan(`Image already copied (duplicate hash): ${filePath}`));
-            duplicateCount++;
-
-            // Get file size and add to space saved
-            const stats = await fs.stat(filePath);
-            spaceSaved += stats.size;
+        if (metadata.copied) {
+            console.log(chalk.cyan(`Image already copied: ${filePath}`));
             progressBar.increment();
             return;
         }
@@ -159,12 +144,14 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
         const formattedTimestamp = formatTimestamp(metadata.timestamp);
         const baseName = path.basename(filePath, ext);
+
         let destFileName = `${formattedTimestamp}_${baseName}${ext}`;
         let destPath = path.join(typeDir, destFileName);
 
+        // Check if the file already exists in the destination directory
         try {
             if (await fs.access(destPath).then(() => true).catch(() => false)) {
-                console.log(chalk.yellow(`Image already exists: ${destPath}`));
+                console.log(chalk.yellow(`File already exists: ${destPath}`));
                 destFileName = `${formattedTimestamp}_${baseName}_copy${ext}`;
                 destPath = path.join(typeDir, destFileName);
             }
@@ -173,35 +160,36 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
             console.log(chalk.green(`Moved: ${filePath} -> ${destPath}`));
 
             metadata.copied = true;
-            copiedHashes.add(metadata.hash);
             processedFiles++;
             progressBar.increment();
         } catch (err) {
-            console.error(chalk.red(`Error processing image: ${filePath}`));
+            console.error(chalk.red(`Error processing file: ${filePath}`));
             console.error(err);
         }
     };
 
     const processFilesConcurrently = async () => {
+        // Use pLimit with the async callback properly
         const promises = relevantFiles.map((filePath) => {
             return limit(async () => {
-                await processFile(filePath);
+                await processFile(filePath);  // Async function call
             });
         });
     
+        // Wait for all promises to resolve
         await Promise.all(promises);
     };
     
     await processFilesConcurrently();
 
+    // Finish the progress bar
     progressBar.stop();
     console.log(`Processed ${processedFiles} out of ${totalFiles} files.`);
-    console.log(chalk.yellow(`Found ${duplicateCount} duplicates and saved ${chalk.green((spaceSaved / (1024 * 1024)).toFixed(2))} MB by skipping them.`));
 
+    // Update the metadata file
     await updateMetadataFile();
 }
 
-const srcDir = '/path/to/source'; 
-const destDir = '/path/to/destination'; 
-
+const srcDir = '/Volumes/Drive4Both'; // Replace with your source directory
+const destDir = './Volumes/PICS'; // Replace with your destination directory
 await organizeFilesByType(srcDir, destDir);

@@ -11,10 +11,16 @@ interface FileMetadata {
     path: string;
     timestamp: string;
     copied: boolean;
+    hash: string;
 }
 
 let fileMetadataArray: FileMetadata[] = [];
 let fileMetadataMap: Record<string, FileMetadata> = {};
+const copiedHashes: Set<string> = new Set(); 
+
+// Variables to track duplicates and space saved
+let duplicateCount = 0;
+let spaceSaved = 0;
 
 try {
     const metadataFile = await fs.readFile(metadataFilePath, 'utf-8');
@@ -25,6 +31,13 @@ try {
         map[item.path] = item;
         return map;
     }, {} as Record<string, FileMetadata>);
+
+    // Populate the copiedHashes set with the hashes of already copied files
+    fileMetadataArray.forEach((item) => {
+        if (item.copied) {
+            copiedHashes.add(item.hash);
+        }
+    });
 } catch (err) {
     console.error(chalk.red(`Error reading metadata file: ${err}`));
 }
@@ -37,6 +50,11 @@ const videoExtensions = new Set([
 ]);
 
 function formatTimestamp(timestamp: string): string {
+    if (timestamp === "1980-01-01T05:00:00.000Z") {
+        console.warn(chalk.yellow(`Invalid timestamp: ${timestamp}. Using current date.`));
+        return new Date().toISOString().split('T')[0]; // Use current date (YYYY-MM-DD)
+    }
+
     const date = new Date(timestamp);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -64,12 +82,15 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
     const collectFiles = async (currentDir: string) => {
         try {
             const items = await fs.readdir(currentDir, { withFileTypes: true });
-
+    
             for (const item of items) {
                 const itemPath = path.join(currentDir, item.name);
-
-                if (item.name.startsWith('.')) continue;
-
+    
+                if (item.name.startsWith('.')) {
+                    console.warn(chalk.yellow(`Skipping hidden or system directory: ${itemPath}`));
+                    continue;
+                }
+    
                 if (item.isDirectory()) {
                     await collectFiles(itemPath);
                 } else {
@@ -77,7 +98,12 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
                 }
             }
         } catch (err) {
-            console.error(chalk.red(`Error accessing folder: ${currentDir}, ${(err as Error).message}`));
+            if (err instanceof Error && (err as NodeJS.ErrnoException).code === 'EPERM') {
+                console.warn(chalk.yellow(`Permission denied: ${currentDir}`));
+            } else {
+                console.error(chalk.red(`Error accessing directory: ${currentDir}`));
+                console.error(err);
+            }
         }
     };
 
@@ -108,7 +134,6 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
     const processFile = async (filePath: string) => {
         const ext = path.extname(filePath).toLowerCase();
-
         const metadata = fileMetadataMap[filePath];
         if (!metadata) {
             console.log(chalk.yellow(`No metadata for video: ${filePath}`));
@@ -116,8 +141,14 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
             return;
         }
 
-        if (metadata.copied) {
-            console.log(chalk.cyan(`Video already copied: ${filePath}`));
+        // Skip the file if the hash is already copied
+        if (copiedHashes.has(metadata.hash)) {
+            console.log(chalk.cyan(`Video already copied (duplicate hash): ${filePath}`));
+            duplicateCount++;
+
+            // Get file size and add to space saved
+            const stats = await fs.stat(filePath);
+            spaceSaved += stats.size;
             progressBar.increment();
             return;
         }
@@ -129,37 +160,49 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
         const formattedTimestamp = formatTimestamp(metadata.timestamp);
         const baseName = path.basename(filePath, ext);
-
         let destFileName = `${formattedTimestamp}_${baseName}${ext}`;
         let destPath = path.join(typeDir, destFileName);
-        let suffix = 1;
-        while (await directoryExists(destPath)) {
-            destFileName = `${formattedTimestamp}_${baseName}_${suffix}${ext}`;
-            destPath = path.join(typeDir, destFileName);
-            suffix++;
+
+        try {
+            if (await fs.access(destPath).then(() => true).catch(() => false)) {
+                console.log(chalk.yellow(`Video already exists: ${destPath}`));
+                destFileName = `${formattedTimestamp}_${baseName}_copy${ext}`;
+                destPath = path.join(typeDir, destFileName);
+            }
+
+            await fs.rename(filePath, destPath);
+            console.log(chalk.green(`Moved: ${filePath} -> ${destPath}`));
+
+            metadata.copied = true;
+            copiedHashes.add(metadata.hash);
+            processedFiles++;
+            progressBar.increment();
+        } catch (err) {
+            console.error(chalk.red(`Error processing video: ${filePath}`));
+            console.error(err);
         }
-
-        await limit(async () => {
-            await fs.copyFile(filePath, destPath);
-            metadata.copied = true; 
-        });
-
-        processedFiles++;
-        progressBar.update(processedFiles);
-        if (processedFiles % 10 === 0) await updateMetadataFile(); 
     };
 
-    for (const file of relevantFiles) {
-        await processFile(file);
-    }
+    const processFilesConcurrently = async () => {
+        const promises = relevantFiles.map((filePath) => {
+            return limit(async () => {
+                await processFile(filePath);
+            });
+        });
+    
+        await Promise.all(promises);
+    };
+    
+    await processFilesConcurrently();
 
     progressBar.stop();
-    await updateMetadataFile(); 
-    console.log('\nVideo organization complete!');
+    console.log(`Processed ${processedFiles} out of ${totalFiles} files.`);
+    console.log(chalk.yellow(`Found ${duplicateCount} duplicates and saved ${chalk.green((spaceSaved / (1024 * 1024)).toFixed(2))} MB by skipping them.`));
+
+    await updateMetadataFile();
 }
 
-// Replace with your source and destination directories
-const srcDir = '/path/to/source';
-const destDir = '/path/to/destination';
+const srcDir = '/path/to/source'; 
+const destDir = '/path/to/destination'; 
 
-organizeFilesByType(srcDir, destDir);
+await organizeFilesByType(srcDir, destDir);

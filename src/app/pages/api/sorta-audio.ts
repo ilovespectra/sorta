@@ -42,11 +42,10 @@ try {
     console.error(chalk.red(`Error reading metadata file: ${err}`));
 }
 
-const imageExtensions = new Set([
-    '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif', '.webp',
-    '.ico', '.heic', '.heif', '.raw', '.cr2', '.nef', '.orf', '.arw',
-    '.sr2', '.dng', '.raf', '.rw2', '.pef', '.svg', '.img', '.psd', '.xcf', '.pcx', '.jp2',
-]);
+const audioExtensions = new Set ([
+    '.mp3', '.wav', '.flac', '.aac', '.ogg', '.m4a', '.wma', '.alac', '.aiff', '.opus',
+  ]);
+  
 
 function formatTimestamp(timestamp: string): string {
     if (timestamp === "1980-01-01T05:00:00.000Z") {
@@ -109,19 +108,19 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
     await collectFiles(srcDir);
 
     const relevantFiles = allFiles.filter(filePath =>
-        imageExtensions.has(path.extname(filePath).toLowerCase())
+        audioExtensions.has(path.extname(filePath).toLowerCase())
     );
 
     const totalFiles = relevantFiles.length;
     if (totalFiles === 0) {
-        console.log('No images to organize.');
+        console.log('No audio to organize.');
         return;
     }
 
-    console.log(`Found ${totalFiles} images. Starting organization...`);
+    console.log(`Found ${totalFiles} audio files. Starting organization...`);
 
     const progressBar = new SingleBar({
-        format: `Processing |${chalk.cyan('{bar}')}| {percentage}% | {value}/{total} Images`,
+        format: `Processing |${chalk.cyan('{bar}')}| {percentage}% | {value}/{total} Audio Files`,
         barCompleteChar: '\u2588',
         barIncompleteChar: '\u2591',
         hideCursor: true,
@@ -135,14 +134,14 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
         const ext = path.extname(filePath).toLowerCase();
         const metadata = fileMetadataMap[filePath];
         if (!metadata) {
-            console.log(chalk.yellow(`No metadata for image: ${filePath}`));
+            console.log(chalk.yellow(`No metadata for audio file: ${filePath}`));
             progressBar.increment();
             return;
         }
 
         // Skip the file if the hash is already copied
         if (copiedHashes.has(metadata.hash)) {
-            console.log(chalk.cyan(`Image already copied (duplicate hash): ${filePath}`));
+            console.log(chalk.cyan(`Audio already copied (duplicate hash): ${filePath}`));
             duplicateCount++;
 
             // Get file size and add to space saved
@@ -152,7 +151,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
             return;
         }
 
-        const typeDir = path.join(destDir, 'images', ext.replace('.', ''));
+        const typeDir = path.join(destDir, 'audio', ext.replace('.', ''));
         if (!(await directoryExists(typeDir))) {
             await fs.mkdir(typeDir, { recursive: true });
         }
@@ -164,7 +163,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
         try {
             if (await fs.access(destPath).then(() => true).catch(() => false)) {
-                console.log(chalk.yellow(`Image already exists: ${destPath}`));
+                console.log(chalk.yellow(`Audio file already exists: ${destPath}`));
                 destFileName = `${formattedTimestamp}_${baseName}_copy${ext}`;
                 destPath = path.join(typeDir, destFileName);
             }
@@ -177,7 +176,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
             processedFiles++;
             progressBar.increment();
         } catch (err) {
-            console.error(chalk.red(`Error processing image: ${filePath}`));
+            console.error(chalk.red(`Error processing audio file: ${filePath}`));
             console.error(err);
         }
     };
