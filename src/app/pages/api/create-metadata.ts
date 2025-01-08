@@ -2,7 +2,9 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 async function getFileMetadata(dir: string, metadataFile: string) {
-    const filesMetadata: Record<string, string> = {};
+    const filesMetadata: { files: { filename: string; path: string; timestamp: string; copied: boolean }[] } = {
+        files: [],
+    };
 
     const scanDirectory = async (currentDir: string) => {
         let items;
@@ -35,9 +37,15 @@ async function getFileMetadata(dir: string, metadataFile: string) {
                     console.log(`Mtime: ${stats.mtime}`);
 
                     // Use `birthtime` if available, otherwise use `mtime` as fallback
-                    const timestamp = stats.birthtime;
+                    const timestamp = stats.birthtime || stats.mtime;
+
                     if (timestamp) {
-                        filesMetadata[filePath] = timestamp.toDateString(); // Convert to Date string
+                        filesMetadata.files.push({
+                            filename: item.name,
+                            path: filePath,
+                            timestamp: timestamp.toISOString(), // ISO format for consistency
+                            copied: false, // Set default copied value to false
+                        });
                     } else {
                         console.warn(`No valid timestamp for file: ${filePath}`);
                     }
