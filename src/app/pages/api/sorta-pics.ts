@@ -18,7 +18,9 @@ try {
 let globalDuplicateAction: 's' | 'r' | 'a' | null = null;
 
 const imageExtensions = new Set([
-    '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp',
+    '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif', '.webp',
+    '.ico', '.heic', '.heif', '.raw', '.cr2', '.nef', '.orf', '.arw',
+    '.sr2', '.dng', '.raf', '.rw2', '.pef', '.svg', '.img', '.psd', '.xcf', '.pcx', '.jp2',
 ]);
 
 // Function to format timestamp as "yyyy-mm-dd"
