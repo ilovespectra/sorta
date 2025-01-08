@@ -51,6 +51,15 @@ async function directoryExists(dir: string): Promise<boolean> {
     }
 }
 
+async function fileExists(filePath: string): Promise<boolean> {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 async function updateMetadataFile() {
     await fs.writeFile(metadataFilePath, JSON.stringify({ files: fileMetadataArray }, null, 4), 'utf-8');
 }
@@ -114,12 +123,21 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 
         const formattedTimestamp = formatTimestamp(metadata.timestamp);
         const baseName = path.basename(filePath, ext);
-        const destFileName = `${formattedTimestamp}_${baseName}${ext}`;
-        const destPath = path.join(typeDir, destFileName);
+        let destFileName = `${formattedTimestamp}_${baseName}${ext}`;
+        let destPath = path.join(typeDir, destFileName);
+
+        // Ensure uniqueness for duplicate files
+        let suffix = 1;
+        while (await fileExists(destPath)) {
+            destFileName = `${formattedTimestamp}_${baseName}_${suffix}${ext}`;
+            destPath = path.join(typeDir, destFileName);
+            suffix++;
+        }
 
         await limit(async () => {
             await fs.copyFile(filePath, destPath);
             metadata.copied = true; // Mark as copied
+            metadata.filename = destFileName; // Update filename in metadata
         });
 
         processedFiles++;
