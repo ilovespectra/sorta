@@ -215,7 +215,7 @@ async function organizeFilesByType(srcDir: string, destDir: string) {
 }
 
 // Replace with your source and destination
-const srcDir = '/Volumes/Drive4Both'; 
-const destDir = '/Volumes/PICS/';
+const srcDir = '/path/to/src'; 
+const destDir = '/path/to/destination';
 
 organizeFilesByType(srcDir, destDir);
