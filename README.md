@@ -8,9 +8,12 @@
 - 🔍 **Duplicate Detection** - SHA-256 hash-based duplicate detection saves storage space
 - 📅 **Date Renaming** - Renames files with `YYYY-MM-DD` prefixes based on creation date
 - 🚀 **Fast Processing** - Concurrent processing handles thousands of files efficiently
-- 📁 **130+ File Types** - Supports images, videos, audio, documents, archives, and more
-- 📈 **Progress Tracking** - Real-time progress bars and statistics
+- � **Resume Capability** - Interrupt and resume operations without duplicates or data loss
+- 📈 **Progress Tracking** - Real-time progress bars with ETA and comprehensive statistics
 - 🛡️ **Safe Operations** - Skips system folders and handles permissions gracefully
+- 📝 **Comprehensive Logging** - Color-coded console output and persistent log files
+- 🤖 **Automatic Metadata** - Auto-creates and validates metadata before organizing
+- 📁 **130+ File Types** - Supports images, videos, audio, documents, archives, and more
 
 ## 📋 Requirements
 
@@ -36,9 +39,15 @@ npm install
 
 ### 2. Basic Usage (Two-Step Process)
 
-**⚠️ IMPORTANT: Always run `create-metadata.ts` FIRST!**
+**⚠️ IMPORTANT: Always run `create-metadata.ts` FIRST for metadata-based scripts!**
+
+**NEW in v2.0: `sorta.ts` now runs metadata creation automatically!**
 
 ```bash
+# Option 1: Use sorta.ts (AUTOMATIC metadata creation)
+ts-node src/app/pages/api/sorta.ts /path/to/source /path/to/destination
+
+# Option 2: Manual two-step process for other scripts
 # Step 1: Create metadata database
 ts-node src/app/pages/api/create-metadata.ts /path/to/source
 
@@ -46,7 +55,16 @@ ts-node src/app/pages/api/create-metadata.ts /path/to/source
 ts-node src/app/pages/api/sorta-pics.ts /path/to/source /path/to/destination
 ```
 
-### 3. Common Use Cases
+### 3. Resume Interrupted Operations
+
+**NEW in v2.0: Resume capability!**
+
+```bash
+# If process is interrupted (Ctrl+C, drive disconnection, crash)
+ts-node src/app/pages/api/sorta.ts --resume
+```
+
+### 4. Common Use Cases
 
 #### Organize Phone Backup
 ```bash
@@ -64,10 +82,13 @@ ts-node src/app/pages/api/sorta-vids.ts ~/Downloads ~/Downloads/Organized
 ts-node src/app/pages/api/sorta-else.ts ~/Downloads ~/Downloads/Organized
 ```
 
-#### Quick Extension Sort (No Metadata)
+#### Quick Extension Sort (No Metadata - Now with Auto-Metadata!)
 ```bash
-# Copies files (originals remain) - no metadata needed
+# v2.0: Automatically creates metadata, validates, and organizes!
 ts-node src/app/pages/api/sorta.ts ~/Desktop ~/Desktop/Sorted
+
+# If interrupted, resume with:
+ts-node src/app/pages/api/sorta.ts --resume
 ```
 
 ---
@@ -77,13 +98,25 @@ ts-node src/app/pages/api/sorta.ts ~/Desktop ~/Desktop/Sorted
 | Script | Purpose | Needs Metadata? | Action | File Types |
 |--------|---------|-----------------|--------|------------|
 | `create-metadata.ts` | **Creates hash database** | N/A | Neither | All files |
+| `sorta.ts` ⭐ **NEW v2.0** | Smart organizer with auto-metadata | ✅ Auto-creates | **COPIES** | All files |
 | `sorta-pics.ts` | Organize images | ✅ Yes | **MOVES** | 50+ image formats |
 | `sorta-vids.ts` | Organize videos | ✅ Yes | **MOVES** | 30+ video formats |
 | `sorta-audio.ts` | Organize audio | ✅ Yes | **MOVES** | 10+ audio formats |
 | `sorta-else.ts` | Organize documents/etc | ✅ Yes | **MOVES** | Documents, archives, scripts |
 | `sorta-by-name.ts` | Find screenshots | ❌ No | **MOVES** | Files with "screenshot" |
-| `sorta.ts` | Generic extension sort | ❌ No | **COPIES** | All files |
 | `inspect.ts` | Debug file metadata | ❌ No | Neither | Debug tool |
+
+### ⭐ What's New in v2.0
+
+**`sorta.ts` has been completely rewritten with enterprise features:**
+- 🤖 **Auto-creates metadata** - No manual step required
+- ✅ **Validates metadata** - Checks file counts match
+- 🔄 **Resume capability** - Continue after interruption
+- 🔍 **Smart duplicate detection** - Hash comparison + interactive handling
+- 📊 **Enhanced progress** - Real-time ETA and detailed stats
+- 📝 **Comprehensive logging** - Color-coded console + `.sorta_log.txt`
+- 🛡️ **Error recovery** - Continues on errors, state saved automatically
+- 💾 **State management** - `.sorta_state.json` tracks progress
 
 ### ⚠️ Important Differences
 
@@ -92,11 +125,49 @@ ts-node src/app/pages/api/sorta.ts ~/Desktop ~/Desktop/Sorted
 - ✅ `sorta-by-name` - **MOVES** files
 - 📋 `sorta.ts` - **COPIES** files (originals remain)
 
+**AUTOMATIC METADATA:**
+- ⭐ `sorta.ts` v2.0 - Automatically creates and validates metadata
+- 📋 Other scripts - Require manual `create-metadata.ts` first
+
+**RESUME CAPABILITY:**
+- ⭐ `sorta.ts` v2.0 - Full resume support with `--resume` flag
+- 📋 Other scripts - No resume capability (run from start)
+
 ---
 
 ## 🎯 How It Works
 
-### The Two-Step Process
+### sorta.ts v2.0 (Automatic Process)
+
+```
+┌─────────────────────────────────────────────────────┐
+│  STEP 1: Auto-Create Metadata                      │
+│  → Runs create-metadata.ts automatically           │
+│  → Scans all files                                  │
+│  → Calculates SHA-256 hashes                        │
+│  → Extracts timestamps                              │
+│  → Creates file_metadata.json                       │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│  STEP 2: Auto-Validate Metadata                    │
+│  → Compares file count: source vs metadata         │
+│  → Validates hash integrity                         │
+│  → Prompts user if mismatch detected               │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│  STEP 3: Organize Files                            │
+│  → Reads metadata                                   │
+│  → Detects duplicates by hash                       │
+│  → Organizes by extension                           │
+│  → Copies files (originals remain)                  │
+│  → Saves state every 100 files                      │
+│  → Reports stats and logs everything               │
+└─────────────────────────────────────────────────────┘
+```
+
+### Other Scripts (Manual Two-Step Process)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -165,12 +236,123 @@ Organized/
 
 ---
 
-## 📖 Documentation
+## � v2.0 Resume Capability
+
+**Never lose progress again!** If your process is interrupted:
+
+### When to Use Resume
+- 🔌 Drive disconnected during transfer
+- ⚡ System crash or power loss
+- ⌨️ Accidentally pressed Ctrl+C
+- 🌐 Network drive connection lost
+- 🔋 Laptop battery died
+
+### How It Works
+1. State saved automatically every 100 files to `.sorta_state.json`
+2. Metadata tracks which files have been copied (`copied: true/false`)
+3. Hash verification prevents duplicate copies
+4. Resume picks up exactly where you left off
+
+### Resume Usage
+```bash
+# Start organization
+ts-node src/app/pages/api/sorta.ts ~/Downloads ~/organized
+
+# ... Process interrupted! ...
+
+# Resume from where you left off
+ts-node src/app/pages/api/sorta.ts --resume
+```
+
+### What Gets Saved
+- Total files count
+- Files already processed
+- Files copied vs skipped
+- Error log
+- Metadata file location
+- Timestamp of last save
+
+**Result:** No duplicates, no incomplete transfers, no data loss! ✅
+
+---
+
+## 📊 Enhanced Progress & Logging
+
+### Real-Time Progress Bar
+```
+Progress: [████████████████░░░░] 75.5% (755/1000) Copied: 720 Skipped: 35 ETA: 45s
+```
+
+Shows:
+- Visual progress bar
+- Percentage complete
+- Files processed / total files
+- Files successfully copied
+- Files skipped (duplicates)
+- Estimated time remaining (ETA)
+
+### Color-Coded Console Output
+- 🔵 **Blue** - Informational messages
+- 🟡 **Yellow** - Warnings (duplicate detection, permission issues)
+- 🔴 **Red** - Errors (file access failures)
+- 🟢 **Green** - Success messages
+
+### Persistent Log File
+All operations logged to `.sorta_log.txt`:
+```
+[2025-12-06T10:30:15.123Z] Starting organization...
+[2025-12-06T10:30:16.456Z] Skipping identical file (hash match): photo.jpg
+[2025-12-06T10:30:17.789Z] Copied file: document.pdf
+[2025-12-06T10:35:42.123Z] ✓ Organization complete - 1000 files processed
+```
+
+### Final Summary Report
+```
+================================================================================
+✓ ORGANIZATION COMPLETE
+================================================================================
+Total Files:     1000
+Copied:          965
+Skipped:         35
+Errors:          0
+Time Elapsed:    125.45s
+Files/Second:    7.97
+================================================================================
+```
+
+---
+
+## 🛡️ Smart Duplicate Detection
+
+### Hash-Based Detection
+- SHA-256 comparison detects identical files
+- Auto-skips identical files (no prompt)
+- Saves storage space
+- Prevents redundant copies
+
+### Interactive Conflict Resolution
+When non-identical files have the same name:
+```
+File conflict: /organized/jpg/photo.jpg
+Options:
+  (s) Skip - Do not copy this file
+  (r) Replace - Overwrite the existing file
+  (a) Add suffix - Create new file with suffix (photo(1).jpg)
+Your choice (s/r/a): a
+Apply this action to all future duplicates? (y/n): y
+```
+
+**"Apply to all"** remembers your choice for the entire session!
+
+---
+
+##  Documentation
 
 ### Quick Reference
 - **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Fast lookup guide with examples and commands
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Visual workflows, diagrams, and system architecture
 - **[REFERENCE.sh](REFERENCE.sh)** - Complete command reference with all options and tips
+- ⭐ **[SORTA_V2_FEATURES.md](SORTA_V2_FEATURES.md)** - Complete v2.0 features guide with resume capability, logging, and troubleshooting
 
 ### Example Scripts
 The `examples/` folder contains ready-to-use bash scripts:
@@ -189,7 +371,66 @@ The `examples/` folder contains ready-to-use bash scripts:
 
 ## 💡 Usage Examples
 
-### Example 1: Organize SD Card Photos
+### Example 1: Quick Organize with sorta.ts v2.0 ⭐
+
+```bash
+# One command - automatic metadata + organization + resume support!
+ts-node src/app/pages/api/sorta.ts ~/Downloads ~/organized
+
+# Output:
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                              SORTA v2.0                                   ║
+# ║                   Smart Terminal-Based File Organizer                     ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+# 
+# ═════════════════════════════════════════════════════════════════════════
+# STEP 1: Creating metadata with SHA-256 hashing...
+# ═════════════════════════════════════════════════════════════════════════
+# Checking file: /Downloads/photo.jpg
+# ✓ Metadata creation completed
+# 
+# ═════════════════════════════════════════════════════════════════════════
+# STEP 2: Validating metadata...
+# ═════════════════════════════════════════════════════════════════════════
+# Files in source directory: 1000
+# Files in metadata:         1000
+# ✓ Metadata validation passed - counts match
+# 
+# ═════════════════════════════════════════════════════════════════════════
+# STEP 3: Organizing files by extension...
+# ═════════════════════════════════════════════════════════════════════════
+# Progress: [████████████████████] 100% (1000/1000) Copied: 965 Skipped: 35 ETA: 0s
+# 
+# ================================================================================
+# ✓ ORGANIZATION COMPLETE
+# ================================================================================
+# Total Files:     1000
+# Copied:          965
+# Skipped:         35
+# Errors:          0
+# Time Elapsed:    125.45s
+# Files/Second:    7.97
+# ================================================================================
+```
+
+### Example 2: Resume After Interruption
+
+```bash
+# Start organization
+ts-node src/app/pages/api/sorta.ts ~/LargeFolder ~/organized
+
+# ... Drive disconnected! Press Ctrl+C ...
+
+# Reconnect drive, then resume
+ts-node src/app/pages/api/sorta.ts --resume
+
+# Output:
+# Resuming previous session...
+# Previous progress: 750/1000 files
+# Progress: [████████████████████] 100% (1000/1000) Copied: 965 Skipped: 35 ETA: 0s
+```
+
+### Example 3: Organize SD Card Photos (Traditional Method)
 
 ```bash
 # Step 1: Create metadata
@@ -204,7 +445,7 @@ ts-node src/app/pages/api/sorta-pics.ts /Volumes/SD_CARD ~/Pictures/Camera
 # ✅ Photos organized to: ~/Pictures/Camera/images/
 ```
 
-### Example 2: External Drive Complete Backup
+### Example 4: External Drive Complete Backup
 
 ```bash
 # Use the pre-made script (edit paths first!)

@@ -21,11 +21,12 @@ export default function Home() {
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
-  const exampleCommand = `npx --max-old-space-size=4096 ts-node --esm sorta.ts /path/to/source /path/to/destination`;
-  const exampleCommandByName = `npx --max-old-space-size=4096 ts-node --esm sorta-by-name.ts /path/to/source /path/to/destination/screenshots`;
-  const exampleCreateMetaData = `npx ts-node --esm create-metadata.ts /path/to/source /path/to/this/github/repo/src/app/pages/api/file_metadata.json`;
-  const exampleSortaPics = `npx --max-old-space-size=4096 ts-node --esm sorta-pics.ts /path/to/source /path/to/destination`;
-  const diskUtil = ` diskutil list`;
+  const exampleCommand = `ts-node src/app/pages/api/sorta.ts /path/to/source /path/to/destination`;
+  const exampleCommandResume = `ts-node src/app/pages/api/sorta.ts --resume`;
+  const exampleCommandByName = `ts-node src/app/pages/api/sorta-by-name.ts /path/to/source /path/to/destination/screenshots`;
+  const exampleCreateMetaData = `ts-node src/app/pages/api/create-metadata.ts /path/to/source`;
+  const exampleSortaPics = `ts-node src/app/pages/api/sorta-pics.ts /path/to/source /path/to/destination`;
+  const diskUtil = `diskutil list`;
   
   const handleCopy = async (text: string) => {
     try {
@@ -222,8 +223,10 @@ export default function Home() {
           <li>🔍 <strong>Duplicate Detection</strong> - SHA-256 hash comparison saves storage space</li>
           <li>📅 <strong>Date Renaming</strong> - Files renamed with YYYY-MM-DD prefixes</li>
           <li>🚀 <strong>Fast Processing</strong> - Handles thousands of files with concurrent processing</li>
-          <li>📁 <strong>130+ File Types</strong> - Images, videos, audio, documents, archives, and more</li>
-          <li>📈 <strong>Progress Tracking</strong> - Real-time progress bars and duplicate reports</li>
+          <li>� <strong>Resume Capability</strong> - Interrupt and resume without duplicates or data loss</li>
+          <li>📝 <strong>Comprehensive Logging</strong> - Color-coded console output and persistent log files</li>
+          <li>�📁 <strong>130+ File Types</strong> - Images, videos, audio, documents, archives, and more</li>
+          <li>📈 <strong>Progress Tracking</strong> - Real-time progress with ETA and detailed statistics</li>
         </ul>
 
         <div style={styles.successBox}>
@@ -290,9 +293,27 @@ export default function Home() {
           Sorta provides specialized scripts for different file types and organization needs:
         </p>
         
+        <div style={{ ...styles.scriptBox, border: `2px solid ${theme === "dark" ? "rgba(50, 205, 50, 0.7)" : "rgba(34, 139, 34, 0.8)"}` }}>
+          <h4 style={{ ...styles.subsectionTitle, fontSize: "1.2rem", marginTop: 0, color: theme === "dark" ? "rgba(50, 205, 50, 0.9)" : "rgba(34, 139, 34, 1)" }}>
+            ⭐ sorta.ts v2.0 <span style={{ fontSize: "0.9rem", fontWeight: "normal" }}>(NEW - Auto-Metadata + Resume)</span>
+          </h4>
+          <ul style={{ paddingLeft: "20px", lineHeight: "2" }}>
+            <li>✅ Automatically creates and validates metadata</li>
+            <li>✅ Organizes all files by extension</li>
+            <li>✅ Resume capability after interruption</li>
+            <li>✅ Enhanced progress tracking with ETA</li>
+            <li>✅ Comprehensive logging and error handling</li>
+          </ul>
+          <div style={styles.successBox}>
+            <p style={{ margin: 0, fontSize: "0.95rem" }}>
+              ✨ <strong>One command</strong> does everything! Files are <strong>COPIED</strong> (originals remain).
+            </p>
+          </div>
+        </div>
+        
         <div style={styles.scriptBox}>
           <h4 style={{ ...styles.subsectionTitle, fontSize: "1.2rem", marginTop: 0 }}>
-            🎯 Main Organizers <span style={{ fontSize: "0.9rem", fontWeight: "normal" }}>(Require Metadata)</span>
+            🎯 Specialized Organizers <span style={{ fontSize: "0.9rem", fontWeight: "normal" }}>(Require Metadata)</span>
           </h4>
           <ul style={{ paddingLeft: "20px", lineHeight: "2" }}>
             <li><code>sorta-pics.ts</code> - Images (50+ formats: jpg, png, heic, raw, etc.)</li>
@@ -313,7 +334,6 @@ export default function Home() {
           </h4>
           <ul style={{ paddingLeft: "20px", lineHeight: "2" }}>
             <li><code>sorta-by-name.ts</code> - Find files by name (e.g., &quot;Screenshot&quot;)</li>
-            <li><code>sorta.ts</code> - Generic extension sort (COPIES files, keeps originals)</li>
           </ul>
         </div>
 
@@ -322,7 +342,7 @@ export default function Home() {
             🔧 Utility Scripts
           </h4>
           <ul style={{ paddingLeft: "20px", lineHeight: "2", marginBottom: 0 }}>
-            <li><code>create-metadata.ts</code> - REQUIRED FIRST STEP for main organizers</li>
+            <li><code>create-metadata.ts</code> - Creates SHA-256 hashes (auto-run by sorta.ts)</li>
             <li><code>inspect.ts</code> - Debug file metadata and timestamps</li>
             <li><code>delete-duplicates.ts</code> - Remove duplicate files</li>
           </ul>
@@ -400,12 +420,67 @@ export default function Home() {
       <div style={styles.card}>
         <h2 style={styles.sectionTitle}>💡 Common Use Cases</h2>
         
-        {/* Use Case 1: Metadata-based */}
+        {/* Use Case 1: sorta.ts v2.0 */}
         <div style={{ marginBottom: "40px" }}>
-          <h3 style={styles.subsectionTitle}>1️⃣ Organize Photos with Duplicate Detection</h3>
+          <h3 style={{ ...styles.subsectionTitle, color: theme === "dark" ? "rgba(50, 205, 50, 0.9)" : "rgba(34, 139, 34, 1)" }}>
+            ⭐ 1️⃣ Quick Organize Everything (sorta.ts v2.0)
+          </h3>
+          <p style={{ marginBottom: "15px", lineHeight: "1.8" }}>
+            <strong>What it does:</strong> One command to organize all files by extension. 
+            Automatically creates metadata, validates file counts, detects duplicates by hash, 
+            and can resume if interrupted. Files are <strong>COPIED</strong> (originals remain).
+          </p>
+          
+          <p style={{ fontWeight: 600, marginTop: "20px", marginBottom: "10px" }}>Start Organization:</p>
+          <div style={styles.codeBlock}>
+            <code style={{ flex: 1, fontSize: "0.9rem" }}>{exampleCommand}</code>
+            <button
+              style={styles.button}
+              onClick={() => handleCopy(exampleCommand)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme === "dark" ? "rgba(255, 140, 0, 0.9)" : "rgba(255, 100, 0, 1)";
+                e.currentTarget.style.color = theme === "dark" ? "#000000" : "#ffffff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = theme === "dark" ? "rgba(255, 140, 0, 0.9)" : "rgba(255, 100, 0, 1)";
+              }}
+            >
+              Copy
+            </button>
+          </div>
+
+          <p style={{ fontWeight: 600, marginTop: "20px", marginBottom: "10px" }}>Resume After Interruption:</p>
+          <div style={styles.codeBlock}>
+            <code style={{ flex: 1, fontSize: "0.9rem" }}>{exampleCommandResume}</code>
+            <button
+              style={styles.button}
+              onClick={() => handleCopy(exampleCommandResume)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme === "dark" ? "rgba(255, 140, 0, 0.9)" : "rgba(255, 100, 0, 1)";
+                e.currentTarget.style.color = theme === "dark" ? "#000000" : "#ffffff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = theme === "dark" ? "rgba(255, 140, 0, 0.9)" : "rgba(255, 100, 0, 1)";
+              }}
+            >
+              Copy
+            </button>
+          </div>
+          <div style={styles.successBox}>
+            <p style={{ margin: 0, fontSize: "0.95rem" }}>
+              ✅ Files will be <strong>COPIED</strong> (originals remain) • Resume capability • Auto-metadata
+            </p>
+          </div>
+        </div>
+        
+        {/* Use Case 2: Metadata-based */}
+        <div style={{ marginBottom: "40px" }}>
+          <h3 style={styles.subsectionTitle}>2️⃣ Organize Photos with Date Renaming (Traditional Method)</h3>
           <p style={{ marginBottom: "15px", lineHeight: "1.8" }}>
             <strong>What it does:</strong> Organizes images by creation date, detects duplicates by hash, 
-            renames with dates (YYYY-MM-DD format), and moves files to organized folders.
+            renames with dates (YYYY-MM-DD format), and <strong>moves</strong> files to organized folders.
           </p>
           
           <p style={{ fontWeight: 600, marginTop: "20px", marginBottom: "10px" }}>Step 1: Create Metadata</p>
@@ -452,39 +527,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Use Case 2: Quick sort */}
+        {/* Use Case 3: Quick sort */}
         <div style={{ marginBottom: "40px" }}>
-          <h3 style={styles.subsectionTitle}>2️⃣ Quick Extension Sort (No Metadata)</h3>
-          <p style={{ marginBottom: "15px", lineHeight: "1.8" }}>
-            <strong>What it does:</strong> Quickly sorts ALL files by extension. COPIES files 
-            (originals remain). Interactive duplicate handling. No date renaming.
-          </p>
-          <div style={styles.codeBlock}>
-            <code style={{ flex: 1, fontSize: "0.9rem" }}>{exampleCommand}</code>
-            <button
-              style={styles.button}
-              onClick={() => handleCopy(exampleCommand)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme === "dark" ? "rgba(255, 140, 0, 0.9)" : "rgba(255, 100, 0, 1)";
-                e.currentTarget.style.color = theme === "dark" ? "#000000" : "#ffffff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = theme === "dark" ? "rgba(255, 140, 0, 0.9)" : "rgba(255, 100, 0, 1)";
-              }}
-            >
-              Copy
-            </button>
-          </div>
-          <div style={styles.successBox}>
-            <p style={{ margin: 0, fontSize: "0.95rem" }}>
-              ✅ Files will be <strong>COPIED</strong> (originals remain)
-            </p>
-          </div>
-        </div>
-
-        {/* Use Case 3: Screenshots */}
-        <div style={{ marginBottom: "30px" }}>
           <h3 style={styles.subsectionTitle}>3️⃣ Find All Screenshots</h3>
           <p style={{ marginBottom: "15px", lineHeight: "1.8" }}>
             <strong>What it does:</strong> Finds all files with &quot;screenshot&quot; in the filename 
@@ -525,9 +569,10 @@ export default function Home() {
         <ul style={{ paddingLeft: "20px", lineHeight: "2", margin: 0 }}>
           <li><strong>BACKUP YOUR DATA FIRST</strong> - Some scripts MOVE files (not copy)</li>
           <li><strong>TEST on a small folder</strong> before running on important data</li>
-          <li><strong>Always run create-metadata.ts FIRST</strong> for pics/vids/audio/else scripts</li>
+          <li><strong>sorta.ts v2.0</strong>: Auto-creates metadata, COPIES files, has resume capability</li>
+          <li><strong>Traditional scripts</strong>: Require create-metadata.ts first, MOVE files</li>
           <li><strong>Scripts that MOVE</strong>: sorta-pics, sorta-vids, sorta-audio, sorta-else, sorta-by-name</li>
-          <li><strong>Scripts that COPY</strong>: sorta.ts only</li>
+          <li><strong>Scripts that COPY</strong>: sorta.ts v2.0 only</li>
         </ul>
       </div>
 
@@ -546,6 +591,14 @@ export default function Home() {
           For detailed instructions, workflows, and examples:
         </p>
         <ul style={{ paddingLeft: "20px", lineHeight: "2.2", fontSize: "1.05rem", marginBottom: 0 }}>
+          <li>
+            <a href="https://github.com/ilovespectra/sorta/blob/main/SORTA_V2_FEATURES.md" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               style={{ ...styles.link, fontWeight: 700 }}>
+              ⭐ SORTA_V2_FEATURES.md
+            </a> - Complete v2.0 guide with resume, logging, and troubleshooting
+          </li>
           <li>
             <a href="https://github.com/ilovespectra/sorta/blob/main/QUICK_REFERENCE.md" 
                target="_blank" 
