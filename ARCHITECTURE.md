@@ -5,7 +5,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                           SORTA SYSTEM                              │
-│                    Terminal-Based File Organizer                     │
+│                    Terminal-Based File Organizer                    │
 └─────────────────────────────────────────────────────────────────────┘
 
                               │
@@ -120,7 +120,7 @@ GOAL: Organize all media to ~/Organized_Backup
 
 Step 1: Create Metadata
 ┌─────────────────────────────────────────┐
-│ $ ts-node create-metadata.ts \         │
+│ $ ts-node create-metadata.ts \          │
 │   /Volumes/iPhone                       │
 │                                         │
 │ Output: file_metadata.json              │
@@ -131,42 +131,42 @@ Step 1: Create Metadata
 
 Step 2: Organize Images
 ┌─────────────────────────────────────────┐
-│ $ ts-node sorta-pics.ts \              │
+│ $ ts-node sorta-pics.ts \               │
 │   /Volumes/iPhone \                     │
 │   ~/Organized_Backup                    │
 │                                         │
 │ Processing: 2,340 images                │
-│ Duplicates found: 45 (123 MB saved)    │
+│ Duplicates found: 45 (123 MB saved)     │
 │ Output: ~/Organized_Backup/images/      │
-│   ├── jpg/ (1,890 files)               │
-│   ├── heic/ (405 files)                │
-│   └── png/ (45 files)                  │
+│   ├── jpg/ (1,890 files)                │
+│   ├── heic/ (405 files)                 │
+│   └── png/ (45 files)                   │
 └─────────────────────────────────────────┘
 
 Step 3: Organize Videos
 ┌─────────────────────────────────────────┐
-│ $ ts-node sorta-vids.ts \              │
+│ $ ts-node sorta-vids.ts \               │
 │   /Volumes/iPhone \                     │
 │   ~/Organized_Backup                    │
 │                                         │
 │ Processing: 843 videos                  │
-│ Duplicates found: 12 (567 MB saved)    │
+│ Duplicates found: 12 (567 MB saved)     │
 │ Output: ~/Organized_Backup/videos/      │
-│   ├── mp4/ (789 files)                 │
-│   └── mov/ (54 files)                  │
+│   ├── mp4/ (789 files)                  │
+│   └── mov/ (54 files)                   │
 └─────────────────────────────────────────┘
 
 Step 4: Organize Audio
 ┌─────────────────────────────────────────┐
-│ $ ts-node sorta-audio.ts \             │
+│ $ ts-node sorta-audio.ts \              │
 │   /Volumes/iPhone \                     │
 │   ~/Organized_Backup                    │
 │                                         │
 │ Processing: 234 audio files             │
-│ Duplicates found: 3 (15 MB saved)      │
+│ Duplicates found: 3 (15 MB saved)       │
 │ Output: ~/Organized_Backup/audio/       │
-│   ├── m4a/ (198 files)                 │
-│   └── mp3/ (36 files)                  │
+│   ├── m4a/ (198 files)                  │
+│   └── mp3/ (36 files)                   │
 └─────────────────────────────────────────┘
 
 RESULT: 
@@ -185,7 +185,7 @@ GOAL: Organize everything + find screenshots
 
 ┌─────────────────────────────────────────┐
 │ STEP 1: Metadata                        │
-│ $ ts-node create-metadata.ts \         │
+│ $ ts-node create-metadata.ts \          │
 │   ~/Downloads                           │
 └─────────────────────────────────────────┘
                     │
@@ -229,17 +229,17 @@ START: ~/Desktop needs quick cleanup
 GOAL: Just sort by extension, keep copies
 
 ┌─────────────────────────────────────────┐
-│ $ ts-node sorta.ts \                   │
+│ $ ts-node sorta.ts \                    │
 │   ~/Desktop \                           │
 │   ~/Desktop/Sorted                      │
 │                                         │
 │ Found: sample.jpg                       │
-│ → Copying to: Sorted/jpg/sample.jpg    │
+│ → Copying to: Sorted/jpg/sample.jpg     │
 │                                         │
 │ Found duplicate: Sorted/jpg/sample.jpg  │
-│ What to do? (s/r/a): a                 │
-│ Apply to all? (y/n): y                 │
-│ → Copying to: Sorted/jpg/sample(1).jpg │
+│ What to do? (s/r/a): a                  │
+│ Apply to all? (y/n): y                  │
+│ → Copying to: Sorted/jpg/sample(1).jpg  │
 └─────────────────────────────────────────┘
 
 RESULT:
@@ -355,7 +355,7 @@ ERROR: "No metadata for file"
 ┌─────────────────────────────────────────┐
 │ CAUSE: Metadata not created or missing  │
 │ FIX:                                    │
-│ $ ts-node create-metadata.ts /source   │
+│ $ ts-node create-metadata.ts /source    │
 └─────────────────────────────────────────┘
 
 ERROR: "Permission denied"
@@ -363,15 +363,15 @@ ERROR: "Permission denied"
 │ CAUSE: System folder or no permissions  │
 │ FIX:                                    │
 │ - Don't organize /System or /Library    │
-│ - Check: ls -la /path                  │
-│ - Consider sudo (risky)                │
+│ - Check: ls -la /path                   │
+│ - Consider sudo (risky)                 │
 └─────────────────────────────────────────┘
 
 ERROR: "Cannot find module"
 ┌─────────────────────────────────────────┐
 │ CAUSE: Dependencies not installed       │
 │ FIX:                                    │
-│ $ npm install                          │
+│ $ npm install                           │
 └─────────────────────────────────────────┘
 ```
 
@@ -381,13 +381,13 @@ ERROR: "Cannot find module"
 ╔════════════════════════════════════════════════════════╗
 ║                   SORTA SUMMARY                        ║
 ╠════════════════════════════════════════════════════════╣
-║ System Type:      Terminal-based file organizer       ║
-║ Platform:         macOS/Linux/Windows (Node.js)       ║
-║ Language:         TypeScript                          ║
-║ Primary Function: Organize files by type & date       ║
-║ Duplicate Method: SHA-256 hash comparison             ║
-║ Speed:            1,000 files in ~2-5 minutes         ║
-║ File Support:     130+ file extensions                ║
+║ System Type:      Terminal-based file organizer        ║
+║ Platform:         macOS/Linux/Windows (Node.js)        ║
+║ Language:         TypeScript                           ║
+║ Primary Function: Organize files by type & date        ║
+║ Duplicate Method: SHA-256 hash comparison              ║
+║ Speed:            1,000 files in ~2-5 minutes          ║
+║ File Support:     130+ file extensions                 ║
 ╚════════════════════════════════════════════════════════╝
 
 KEY FEATURES:
